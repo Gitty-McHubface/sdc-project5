@@ -104,7 +104,7 @@ Bounding boxes for each detection were computed. Boxes with too large of a heigh
 
 A video of vehicle detections from the project video can be found at ./processed_video.mp4.
 
-## Conclustion
+## Conclusion
 
 The SVM did a good job of detecting vehicles without too many false positives. One problem encountered was that the SVM had trouble detecting the white car and required me to add a large number of additional windows. These additional windows significantly increased the processing time for each frame. This pipeline would not be suitable for a real-time application. One possible solution would be to find more images of white cars and add them to the training data.
 
