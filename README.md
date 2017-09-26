@@ -98,7 +98,7 @@ To remove false positives, the detection image is added to a circular buffer for
 
 <img src="./examples/labels.png" width="450"/>
 
-Bounding boxes for each detection were computed. Boxes with too large of a height/width or width/height ratio were discarded. The resulting detections for the sample frame can be seen below:
+Bounding boxes for each detection were calculated. Boxes with too large of a height/width or width/height ratio were discarded. The resulting detections for the sample frame can be seen below:
 
 <img src="./examples/final.png" width="450"/>
 
