@@ -54,11 +54,13 @@ The results of feature extraction on each color channel of the non-vehicle image
 
 ### Training
 
-Prior to training, the HOG, spatial binning and color histograms for all color channels were transformed into a single feature vector. This data was normalized using the sklearn.preprocessing.StandardScaler and then randomly shuffled using the sklear.utils.shuffle function. The dataset was then split into a training (80%) and test (20%) set.
+Prior to training, the HOG, spatial binning and color histogram for all color channels of each image were transformed into a single feature vector. This data was normalized using the sklearn.preprocessing.StandardScaler and then randomly shuffled using the sklear.utils.shuffle function. The dataset was then split into a training (80%) and test (20%) set.
 
 A linear SVM was trained using sklearn.svm.LinearSVC. The prediction accuracy on the test set was 98%.
 
 ## Detecting Cars
+
+To detect cars in an image, a sliding window search was performed using various window sizes and strides. 
 
 <img src="./examples/orig.png" width="450"/>
 
@@ -82,11 +84,19 @@ A linear SVM was trained using sklearn.svm.LinearSVC. The prediction accuracy on
 |---------------------------------------------|-----------------------------------------------|
 | <img src="./examples/5.png" width="400"/>   | <img src="./examples/5_2.png" width="400"/>   |
 
+A heatmap for the detections above is show below:
+
 <img src="./examples/heat.png" width="450"/>
+
+A threshold of three overlapping windows is taken and the remaining pixel values were set to one. The resulting detection is shown below:
 
 <img src="./examples/thresh.png" width="450"/>
 
+To remove false positives, the detection image is added to a circular buffer for the last ten frames. The pixel values for the frames in the buffer were summed and a threshold of eight was taken:
+
 <img src="./examples/labels.png" width="450"/>
+
+The resulting bounding box for the detection added to the image is below:
 
 <img src="./examples/final.png" width="450"/>
 
