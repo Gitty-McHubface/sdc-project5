@@ -108,6 +108,6 @@ A video of vehicle detections from the project video can be found at ./processed
 
 The SVM did a good job of detecting vehicles without too many false positives. One problem encountered was that the SVM had trouble detecting the white car and required me to add a large number of additional windows. These additional windows significantly increased the processing time for each frame. This pipeline would not be suitable for a real-time application. One possible solution would be to find more images of white cars and add them to the training data.
 
-In experimentation, I found that I could have removed the color histogram to reduce processing time. It did not seem to make a significant difference in detection of vehicles.
+In experimentation, I found that I could have removed the color histogram from the feature vector to reduce processing time. It did not seem to make a significant difference in the detection of vehicles.
 
 I would have also liked to experiment more with a CNN, but I was not able to get it working as well as the SVM in the time that I had.
