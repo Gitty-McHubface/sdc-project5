@@ -26,6 +26,27 @@ The training data consists of 8800 vehicle and 8971 non-vehicle images. Each col
 
 ### Feature Extraction
 
+After experimenting with RGB, HLS and HSV color spaces, I found that the YCrCb color space gave the best results in training a linear SVM. The first step of feature extraction was to convert the image to the YCrCb color space.
+
+Next, I extracted the following features from each color channel:
+
+- Histogram of Oriented Gradients (HOG)
+- Spatially Binned Color
+- Color Histogram
+
+| HOG                                                | Spatial Binning (32 x 32)                             |
+|----------------------------------------------------|-------------------------------------------------------|
+| <img src="./examples/car_hog1.png" width="250"/>   | <img src="./examples/car_bin_ch1.png" width="250"/>   |
+| <img src="./examples/car_hog2.png" width="250"/>   | <img src="./examples/car_bin_ch2.png" width="250"/>   |
+| <img src="./examples/car_hog3.png" width="250"/>   | <img src="./examples/car_bin_ch3.png" width="250"/>   |
+
+
+
+| HOG                                                   | Spatial Binning (32 x 32)                                |
+|-------------------------------------------------------|----------------------------------------------------------|
+| <img src="./examples/noncar_hog1.png" width="250"/>   | <img src="./examples/noncar_bin_ch1.png" width="250"/>   |
+| <img src="./examples/noncar_hog2.png" width="250"/>   | <img src="./examples/noncar_bin_ch2.png" width="250"/>   |
+| <img src="./examples/noncar_hog3.png" width="250"/>   | <img src="./examples/noncar_bin_ch3.png" width="250"/>   |
 
 
 <img src="./examples/orig.png" width="450"/>
