@@ -30,24 +30,35 @@ After experimenting with RGB, HLS and HSV color spaces, I found that the YCrCb c
 
 Next, I extracted the following features from each color channel:
 
-- Histogram of Oriented Gradients (HOG)
-- Spatially Binned Color
-- Color Histogram
+- Histogram of Oriented Gradients (HOG: 9 orientation bins, 8 pixels per cell, 2 cells per block)
+- Spatially Binned Color (32 x 32)
+- Color Histogram (32 bins)
 
-| HOG                                                | Spatial Binning (32 x 32)                             |
-|----------------------------------------------------|-------------------------------------------------------|
-| <img src="./examples/car_hog1.png" width="250"/>   | <img src="./examples/car_bin_ch1.png" width="250"/>   |
-| <img src="./examples/car_hog2.png" width="250"/>   | <img src="./examples/car_bin_ch2.png" width="250"/>   |
-| <img src="./examples/car_hog3.png" width="250"/>   | <img src="./examples/car_bin_ch3.png" width="250"/>   |
+I experimented with various different parameters for HOG and spatial binning and found these values to work best in training a SVM to predict the class an image belongs to.
 
+The results of feature extraction on each color channel of the vehicle image can be seen below:
 
+| HOG                                                | Spatial Binning (32 x 32)                             | Color Histogram (32 bins) |
+|----------------------------------------------------|-------------------------------------------------------|--|
+| <img src="./examples/car_hog1.png" width="250"/>   | <img src="./examples/car_bin_ch1.png" width="250"/>   |<img src="./examples/car_hist_ch1.png" width="250"/>   |
+| <img src="./examples/car_hog2.png" width="250"/>   | <img src="./examples/car_bin_ch2.png" width="250"/>   |<img src="./examples/car_hist_ch2.png" width="250"/>   |
+| <img src="./examples/car_hog3.png" width="250"/>   | <img src="./examples/car_bin_ch3.png" width="250"/>   |<img src="./examples/car_hist_ch3.png" width="250"/>   |
 
-| HOG                                                   | Spatial Binning (32 x 32)                                |
-|-------------------------------------------------------|----------------------------------------------------------|
-| <img src="./examples/noncar_hog1.png" width="250"/>   | <img src="./examples/noncar_bin_ch1.png" width="250"/>   |
-| <img src="./examples/noncar_hog2.png" width="250"/>   | <img src="./examples/noncar_bin_ch2.png" width="250"/>   |
-| <img src="./examples/noncar_hog3.png" width="250"/>   | <img src="./examples/noncar_bin_ch3.png" width="250"/>   |
+The results of feature extraction on each color channel of the non-vehicle image can be seen below:
 
+| HOG                                                   | Spatial Binning (32 x 32)                                | Color Histogram (32 bins) |
+|-------------------------------------------------------|----------------------------------------------------------|--|
+| <img src="./examples/noncar_hog1.png" width="250"/>   | <img src="./examples/noncar_bin_ch1.png" width="250"/>   | <img src="./examples/noncar_hist_ch1.png" width="250"/>   |
+| <img src="./examples/noncar_hog2.png" width="250"/>   | <img src="./examples/noncar_bin_ch2.png" width="250"/>   | <img src="./examples/noncar_hist_ch2.png" width="250"/>   |
+| <img src="./examples/noncar_hog3.png" width="250"/>   | <img src="./examples/noncar_bin_ch3.png" width="250"/>   | <img src="./examples/noncar_hist_ch3.png" width="250"/>   |
+
+### Training
+
+Prior to training, the HOG, spatial binning and color histograms for all color channels were transformed into a single feature vector. This data was normalized using the sklearn.preprocessing.StandardScaler and then randomly shuffled using the sklear.utils.shuffle function. The dataset was then split into a training (80%) and test (20%) set.
+
+A linear SVM was trained using sklearn.svm.LinearSVC. The prediction accuracy on the test set was 98%.
+
+## Detecting Cars
 
 <img src="./examples/orig.png" width="450"/>
 
