@@ -15,29 +15,32 @@
 
 <img src="./examples/orig.png" width="400"/>
 
-| Windows (64 x 64)                           | Detections                                    |
+| Windows (80 x 80)                           | Detections                                    |
 |---------------------------------------------|-----------------------------------------------|
 | <img src="./examples/1.png" width="400"/>   | <img src="./examples/1_2.png" width="400"/>   |
 
-| Windows (64 x 64)                           | Detections                                    |
+| Windows (108 x 108)                         | Detections                                    |
 |---------------------------------------------|-----------------------------------------------|
 | <img src="./examples/2.png" width="400"/>   | <img src="./examples/2_2.png" width="400"/>   |
 
-| Windows (64 x 64)                           | Detections                                    |
+| Windows (128 x 128)                         | Detections                                    |
 |---------------------------------------------|-----------------------------------------------|
 | <img src="./examples/3.png" width="400"/>   | <img src="./examples/3_2.png" width="400"/>   |
 
-| Windows (64 x 64)                           | Detections                                    |
+| Windows (192 x 192)                         | Detections                                    |
 |---------------------------------------------|-----------------------------------------------|
 | <img src="./examples/4.png" width="400"/>   | <img src="./examples/4_2.png" width="400"/>   |
 
-| Windows (64 x 64)                           | Detections                                    |
+| Windows (256 x 256)                         | Detections                                    |
 |---------------------------------------------|-----------------------------------------------|
 | <img src="./examples/5.png" width="400"/>   | <img src="./examples/5_2.png" width="400"/>   |
 
 <img src="./examples/heat.png" width="400"/>
+
 <img src="./examples/thresh.png" width="400"/>
+
 <img src="./examples/labels.png" width="400"/>
+
 <img src="./examples/final.png" width="400"/>
 
 
