@@ -9,11 +9,26 @@
 * Run the pipeline on a video stream and create a heat map of recurring detections frame by frame to reject outliers and follow detected vehicles.
 * Estimate a bounding box for detected vehicles.
 
-| Car                                           | Non-car                                          |
+## Files
+ * find_cars.py - Python code to extract features, train a classifier and perform a sliding window search for cars in each frame of a video
+ * svc_pickle.p - The saved LinearSVC and StandardScaler objects
+ * processed_video.mp4 - The video output by find_cars.py using project_video.mp4 as input
+
+## Training a Classifier
+
+### The Data
+
+The training data consists of 8800 vehicle and 8971 non-vehicle images. Each color image is saved in the PNG format and is 64x64 pixels. Examples from each class can be seen below.
+
+| Vehicle                                       | Non-vehicle                                      |
 |-----------------------------------------------|--------------------------------------------------|
 | <img src="./examples/car.png" width="250"/>   | <img src="./examples/noncar.png" width="250"/>   |
 
-<img src="./examples/orig.png" width="400"/>
+### Feature Extraction
+
+
+
+<img src="./examples/orig.png" width="450"/>
 
 | Windows (80 x 80)                           | Detections                                    |
 |---------------------------------------------|-----------------------------------------------|
@@ -35,13 +50,13 @@
 |---------------------------------------------|-----------------------------------------------|
 | <img src="./examples/5.png" width="400"/>   | <img src="./examples/5_2.png" width="400"/>   |
 
-<img src="./examples/heat.png" width="400"/>
+<img src="./examples/heat.png" width="450"/>
 
-<img src="./examples/thresh.png" width="400"/>
+<img src="./examples/thresh.png" width="450"/>
 
-<img src="./examples/labels.png" width="400"/>
+<img src="./examples/labels.png" width="450"/>
 
-<img src="./examples/final.png" width="400"/>
+<img src="./examples/final.png" width="450"/>
 
 
 Here are links to the labeled data for [vehicle](https://s3.amazonaws.com/udacity-sdc/Vehicle_Tracking/vehicles.zip) and [non-vehicle](https://s3.amazonaws.com/udacity-sdc/Vehicle_Tracking/non-vehicles.zip) examples to train your classifier.  These example images come from a combination of the [GTI vehicle image database](http://www.gti.ssr.upm.es/data/Vehicle_database.html), the [KITTI vision benchmark suite](http://www.cvlibs.net/datasets/kitti/), and examples extracted from the project video itself.   You are welcome and encouraged to take advantage of the recently released [Udacity labeled dataset](https://github.com/udacity/self-driving-car/tree/master/annotations) to augment your training data.  
