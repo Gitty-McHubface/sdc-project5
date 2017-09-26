@@ -1,3 +1,5 @@
+# Note: Various functions are taken or modified from Udacity's SDC course
+
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
@@ -10,7 +12,7 @@ import cv2
 import glob
 import os
 
-DEBUG = True
+DEBUG = False
 
 IN_VIDEO = './project_video.mp4'
 OUT_VIDEO = './processed_video.mp4'
@@ -75,7 +77,7 @@ def color_hist(img, nbins=32):    #bins_range=(0, 256)
 
 
 # Define a single function that can extract features using hog sub-sampling and make predictions
-def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins):
+def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, cells_per_step_x, cells_per_step_y, spatial_size, hist_bins):
     draw_img = np.copy(img)
 
     img = img.astype(np.float32) / 255
@@ -90,26 +92,27 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, ce
     ch3 = ctrans_tosearch[:,:,2]
 
     # Define blocks and steps as above
-    nxblocks = (ch1.shape[1] // pix_per_cell) - cell_per_block + 1
+    nxblocks = (ch1.shape[1] // pix_per_cell) - cell_per_block + 1 # 159
     nyblocks = (ch1.shape[0] // pix_per_cell) - cell_per_block + 1 
     nfeat_per_block = orient * cell_per_block**2
 
     # 64 was the orginal sampling rate, with 8 cells and 8 pix per cell
     window = 64
-    nblocks_per_window = (window // pix_per_cell) - cell_per_block + 1
-    cells_per_step = 2  # Instead of overlap, define how many cells to step
-    nxsteps = (nxblocks - nblocks_per_window) // cells_per_step
-    nysteps = (nyblocks - nblocks_per_window) // cells_per_step
+    nblocks_per_window = (window // pix_per_cell) - cell_per_block + 1 # 7
+    nxsteps = (nxblocks - nblocks_per_window) // cells_per_step_x + 1 # 76 + 1
+    nysteps = (nyblocks - nblocks_per_window) // cells_per_step_y + 1 
 
     # Compute individual channel HOG features for the entire image
     hog1 = get_hog_features(ch1, orient, pix_per_cell, cell_per_block, feature_vec=False)
     hog2 = get_hog_features(ch2, orient, pix_per_cell, cell_per_block, feature_vec=False)
     hog3 = get_hog_features(ch3, orient, pix_per_cell, cell_per_block, feature_vec=False)
 
+    boxes = []
     for xb in range(nxsteps):
         for yb in range(nysteps):
-            ypos = yb * cells_per_step
-            xpos = xb * cells_per_step
+            ypos = yb * cells_per_step_y
+            xpos = xb * cells_per_step_x
+
             # Extract HOG for this patch
             hog_feat1 = hog1[ypos:ypos + nblocks_per_window, xpos:xpos + nblocks_per_window].ravel() 
             hog_feat2 = hog2[ypos:ypos + nblocks_per_window, xpos:xpos + nblocks_per_window].ravel() 
@@ -130,21 +133,24 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, ce
             test_features = X_scaler.transform(np.hstack((spatial_features, hist_features, hog_features)).reshape(1, -1))    
             test_prediction = svc.predict(test_features)
 
-#            print(test_features.shape)
-            if DEBUG:
-                print(test_prediction)
             if test_prediction == 1:
                 xbox_left = np.int(xleft * scale)
                 ytop_draw = np.int(ytop * scale)
                 win_draw = np.int(window * scale)
-                cv2.rectangle(draw_img, (xbox_left, ytop_draw + ystart), (xbox_left + win_draw, ytop_draw + win_draw + ystart), (0, 255, 0), 6) 
+                cv2.rectangle(draw_img, (xbox_left, ytop_draw + ystart), (xbox_left + win_draw, ytop_draw + win_draw + ystart), (0, 255, 0), 2) 
+
+                boxes.append(((xbox_left, ytop_draw + ystart), (xbox_left + win_draw, ytop_draw + win_draw + ystart)))
 #            elif DEBUG:
 #                xbox_left = np.int(xleft * scale)
 #                ytop_draw = np.int(ytop * scale)
 #                win_draw = np.int(window * scale)
-#                cv2.rectangle(draw_img, (xbox_left, ytop_draw + ystart), (xbox_left + win_draw, ytop_draw + win_draw + ystart), (255, 0, 0), 6) 
+#                cv2.rectangle(draw_img, (xbox_left, ytop_draw + ystart), (xbox_left + win_draw, ytop_draw + win_draw + ystart), (255, 0, 0), 2) 
 
-    return draw_img
+    if DEBUG:
+        plt.imshow(draw_img)
+        plt.show()
+
+    return boxes
 
 
 def add_heat(heatmap, bbox_list):
@@ -165,9 +171,10 @@ def apply_threshold(heatmap, threshold):
     return heatmap
 
 
-def draw_labeled_bboxes(img, labels):
+GREEN = (0, 255, 0)
+def draw_labeled_bboxes(img, labels, is_valid):
     # Iterate through all detected cars
-    for car_number in range(1, labels[1]+1):
+    for car_number in range(1, labels[1] + 1):
         # Find pixels with each car_number label value
         nonzero = (labels[0] == car_number).nonzero()
         # Identify x and y values of those pixels
@@ -176,26 +183,10 @@ def draw_labeled_bboxes(img, labels):
         # Define a bounding box based on min/max x and y
         bbox = ((np.min(nonzerox), np.min(nonzeroy)), (np.max(nonzerox), np.max(nonzeroy)))
         # Draw the box on the image
-        cv2.rectangle(img, bbox[0], bbox[1], (0, 0, 255), 6)
+        if is_valid(bbox):
+            cv2.rectangle(img, bbox[0], bbox[1], GREEN, 2)
     # Return the image
     return img
-
-
-# Define a function to return some characteristics of the dataset 
-def data_look(car_list, notcar_list):
-    data_dict = {}
-    # Define a key in data_dict "n_cars" and store the number of car images
-    data_dict["n_cars"] = len(car_list)
-    # Define a key "n_notcars" and store the number of notcar images
-    data_dict["n_notcars"] = len(notcar_list)
-    # Read in a test image, either car or notcar
-    example_img = mpimg.imread(car_list[0])
-    # Define a key "image_shape" and store the test image shape 3-tuple
-    data_dict["image_shape"] = example_img.shape
-    # Define a key "data_type" and store the data type of the test image.
-    data_dict["data_type"] = example_img.dtype
-    # Return data_dict
-    return data_dict
 
 
 def extract_features(img_file):
@@ -211,19 +202,71 @@ def extract_features(img_file):
     return np.concatenate((spatial_features, hist_features, hog1_features, hog2_features, hog3_features))
 
 
+from collections import deque
+frame_detection_buffer = deque(maxlen=10)
+
 svc = None
 X_scaler = None
+
 def process_image(image):
     global svc
     global X_scaler
 
-    draw_img = find_cars(image, 400, 700, 2.3, svc, X_scaler, 9, 8, 2, (32, 32), 32)
+    out_img = np.copy(image)
 
+    boxes = []
+    boxes += find_cars(image, 380, 500, 1.25, svc, X_scaler, 9, 8, 2, 1, 1, (32, 32), 32)
+    boxes += find_cars(image, 380, 550, 1.7, svc, X_scaler, 9, 8, 2, 1, 1, (32, 32), 32)
+    boxes += find_cars(image, 380, 640, 2.0, svc, X_scaler, 9, 8, 2, 2, 2, (32, 32), 32)
+    boxes += find_cars(image, 380, 680, 3.0, svc, X_scaler, 9, 8, 2, 3, 1, (32, 32), 32)
+    boxes += find_cars(image, 380, 680, 4.0, svc, X_scaler, 9, 8, 2, 4, 1, (32, 32), 32)
+
+    heat = np.zeros_like(image[:,:,0]).astype(np.float)
+    add_heat(heat, boxes)
     if DEBUG:
-        plt.imshow(draw_img)
+        plt.imshow(heat)
         plt.show()
 
-    return draw_img
+    # Threshold heatmap to discard pixels with less than 3 overlapping windows
+    heat_thresh = apply_threshold(heat, 2)
+    heat_thresh[heat_thresh > 1] = 1
+    if DEBUG:
+        plt.imshow(heat_thresh)
+        plt.show()
+
+    # Append to the circular frame buffer and discard pixels with less than 8 detections
+    # over the last 10 frames
+    frame_detection_buffer.append(heat_thresh)
+    detections_heatmap = np.sum(frame_detection_buffer, axis=0)
+    detections_thresh = apply_threshold(detections_heatmap, 7)
+    if DEBUG:
+        plt.imshow(detections_thresh, cmap='gray')
+        plt.show()
+
+    from scipy.ndimage.measurements import label
+    labels = label(detections_thresh)
+
+    if DEBUG:
+        print(labels[1], 'cars found')
+        plt.imshow(labels[0], cmap='gray')
+        plt.show()
+
+    # A bounding box is not valid if the H/W or W/H ratios are too large
+    def is_valid_box(bbox, max_sides_ratio=3):
+        x1, y1 = bbox[0]
+        x2, y2 = bbox[1]
+
+        ratio = abs(y2 - y1) / abs(x2 - x1)
+        if ratio > max_sides_ratio or 1 / ratio < 1 / max_sides_ratio:
+            return False
+        return True
+
+    out_img = draw_labeled_bboxes(out_img, labels, is_valid_box)
+    if DEBUG:
+        plt.imshow(out_img)
+        plt.show()
+
+    return out_img
 
 
 def main():
@@ -297,7 +340,7 @@ def main():
     pickle.dump(dist_pickle, fileObject)
     fileObject.close()
 
-    clip1 = VideoFileClip(IN_VIDEO).subclip(19, 20)
+    clip1 = VideoFileClip(IN_VIDEO).subclip(20, 45)
     out_clip = clip1.fl_image(process_image)
     out_clip.write_videofile(OUT_VIDEO, audio=False)
 
