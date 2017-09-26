@@ -60,9 +60,11 @@ A linear SVM was trained using sklearn.svm.LinearSVC. The prediction accuracy on
 
 ## Detecting Cars
 
-To detect cars in an image, a sliding window search was performed using various window sizes and strides. 
+To detect cars in an image, a sliding window search was performed using various window sizes and strides. An example frame from the project video is below:
 
 <img src="./examples/orig.png" width="450"/>
+
+The windows and their detections for the sample frame are shown below:
 
 | Windows (80 x 80)                           | Detections                                    |
 |---------------------------------------------|-----------------------------------------------|
@@ -84,31 +86,28 @@ To detect cars in an image, a sliding window search was performed using various 
 |---------------------------------------------|-----------------------------------------------|
 | <img src="./examples/5.png" width="400"/>   | <img src="./examples/5_2.png" width="400"/>   |
 
-A heatmap for the detections above is show below:
+A heatmap for the detections is shown below:
 
 <img src="./examples/heat.png" width="450"/>
 
-A threshold of three overlapping windows is taken and the remaining pixel values were set to one. The resulting detection is shown below:
+A threshold of three (3+) overlapping windows is taken and the remaining pixel values are set to one. The resulting detection is shown below:
 
 <img src="./examples/thresh.png" width="450"/>
 
-To remove false positives, the detection image is added to a circular buffer for the last ten frames. The pixel values for the frames in the buffer were summed and a threshold of eight was taken:
+To remove false positives, the detection image is added to a circular buffer for the last ten frames. The pixel values for the frames in the buffer were summed and a threshold of eight (8+) was taken:
 
 <img src="./examples/labels.png" width="450"/>
 
-The resulting bounding box for the detection added to the image is below:
+Bounding boxes for each detection were computed. Boxes with too large of a height/width or width/height ratio were discarded. The resulting detections for the sample frame can be seen below:
 
 <img src="./examples/final.png" width="450"/>
 
+A video of vehicle detections from the project video can be found at ./processed_video.mp4.
 
-Here are links to the labeled data for [vehicle](https://s3.amazonaws.com/udacity-sdc/Vehicle_Tracking/vehicles.zip) and [non-vehicle](https://s3.amazonaws.com/udacity-sdc/Vehicle_Tracking/non-vehicles.zip) examples to train your classifier.  These example images come from a combination of the [GTI vehicle image database](http://www.gti.ssr.upm.es/data/Vehicle_database.html), the [KITTI vision benchmark suite](http://www.cvlibs.net/datasets/kitti/), and examples extracted from the project video itself.   You are welcome and encouraged to take advantage of the recently released [Udacity labeled dataset](https://github.com/udacity/self-driving-car/tree/master/annotations) to augment your training data.  
+## Conclustion
 
-Some example images for testing your pipeline on single frames are located in the `test_images` folder.  To help the reviewer examine your work, please save examples of the output from each stage of your pipeline in the folder called `ouput_images`, and include them in your writeup for the project by describing what each image shows.    The video called `project_video.mp4` is the video your pipeline should work well on.  
+The SVM did a good job of detecting vehicles without too many false positives. One problem encountered was that the SVM had trouble detecting the white car and required me to add a large number of additional windows. These additional windows significantly increased the processing time for each frame. This pipeline would not be suitable for a real-time application. One possible solution would be to find more images of white cars and add them to the training data.
 
-**As an optional challenge** Once you have a working pipeline for vehicle detection, add in your lane-finding algorithm from the last project to do simultaneous lane-finding and vehicle detection!
+In experimentation, I found that I could have removed the color histogram to reduce processing time. It did not seem to make a significant difference in detection of vehicles.
 
-**If you're feeling ambitious** (also totally optional though), don't stop there!  We encourage you to go out and take video of your own, and show us how you would implement this project on a new video!
-
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
-
+I would have also liked to experiment more with a CNN, but I was not able to get it working as well as the SVM in the time that I had.
